@@ -13,10 +13,32 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Set Dynamic Version
+        id: version
+        run: |
+          if [ -f version.txt ]; then
+            VERSION=$(cat version.txt)
+          else
+            VERSION=0
+          fi
+          NEW_VERSION=$((VERSION + 1))
+          echo "VERSION=$NEW_VERSION" >> $GITHUB_ENV
+          echo $NEW_VERSION > version.txt
+
       - name: Login to Docker Hub
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
       - name: Build and Push Docker Image
         run: |
-          docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/supermario-game:v1.0 .
-          docker push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/supermario-game:v1.0
+          docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/supermario-game:v${{ env.VERSION }} .
+          docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/supermario-game:latest .
+          docker push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/supermario-game:v${{ env.VERSION }}
+          docker push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/supermario-game:latest
+
+      - name: Commit Version Update
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add version.txt
+          git commit -m "Bump version to v${{ env.VERSION }}" || echo "No changes to commit"
+          git push || echo "Nothing to push"
