@@ -71,7 +71,6 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/supermario-game:v${{ steps.set_version.outputs.version }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/supermario-game:latest
 
   container_security_scan:
     runs-on: ubuntu-latest
@@ -91,7 +90,7 @@ jobs:
           exit-code: '0'
 
       - name: Upload Trivy Results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
