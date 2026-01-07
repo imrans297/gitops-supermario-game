@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: supermario-game
-        image: imrans297/supermario-game:latest
+        image: imrans297/supermario-game:v1.6
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
